@@ -56,9 +56,9 @@ const Search = ({ search, onSearch }) => (
 );
 
 const List = ( {list} ) => { 
-  // spread the object before passing it to another compoenent
-  // you don't name spead 
-  return list.map(item => < Item key= {item.objectID} {...item} />)
+  // now are speading the item after taking objectID
+  // which will remove the objectID from remaning item.
+  return list.map( ({ objectID, ...item }) => < Item key= {objectID} {...item} />)
 }
 
 // now you can directly destructring item

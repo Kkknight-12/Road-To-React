@@ -56,9 +56,10 @@ const Search = ({ search, onSearch }) => (
 );
 
 const List = ( {list} ) => { 
-  // now are speading the item after taking objectID
+  // rest item after taking objectID
   // which will remove the objectID from remaning item.
   return list.map( ({ objectID, ...item }) => < Item key= {objectID} {...item} />)
+  //                             rest                                  spread
 }
 
 // now you can directly destructring item

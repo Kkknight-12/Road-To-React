@@ -56,12 +56,13 @@ const Search = ({ search, onSearch }) => (
 );
 
 const List = ( {list} ) => { 
-  return list.map(item => < Item key= {item.objectID} item = {item} />)
+  // spread the object before passing it to another compoenent
+  // you don't name spead 
+  return list.map(item => < Item key= {item.objectID} {...item} />)
 }
 
-// destructring 
-const Item = ( { item:{ url, title, author, num_comments, points } } ) => {
-  // const { url, title, author, num_comments, points } = item;
+// now you can directly destructring item
+const Item = ( { url, title, author, num_comments, points }  ) => {
   return (
     <div>
       <span>

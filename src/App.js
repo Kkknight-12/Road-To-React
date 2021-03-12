@@ -88,6 +88,7 @@ function App() {
       {console.log('return inside App ran')}
       <header className="App-header">
         {/* <Search search={searchTerm} onSearch={handleSearch} /> */}
+        {/* Making Search reusable component */}
         <InputWithLabel
         id = 'search'
         label = 'Search'

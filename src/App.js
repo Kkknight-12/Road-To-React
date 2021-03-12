@@ -14,7 +14,7 @@ const useSemiPersistentState = (key, initialState) => {
     localStorage.getItem(key) || initialState );
 
 // useEffect is used to change the value of search term in local storage
-// whenever dependency term changes loacal storage term will change
+// whenever dependency term changes local storage term will change
   useEffect( () => {
     localStorage.setItem( key, value );
   }, [value, key] ); // dependency
@@ -70,7 +70,7 @@ function App() {
     },
   ];
                                                                 // key, value
-  const [ searchTerm, setSearchTerm ] = useSemiPersistentState('search', '');
+  const [ searchTerm, setSearchTerm ] = useSemiPersistentState( 'search', '');
   console.log('After searchTerm')
 
   const handleSearch = event => { setSearchTerm( event.target.value ) };
@@ -87,7 +87,13 @@ function App() {
       <div className="App">
       {console.log('return inside App ran')}
       <header className="App-header">
-        <Search search={searchTerm} onSearch={handleSearch} />
+        {/* <Search search={searchTerm} onSearch={handleSearch} /> */}
+        <InputWithLabel
+        id = 'search'
+        label = 'Search'
+        value = {searchTerm}
+        onInputChange = {handleSearch}
+        />
         <hr />
         <List list={searchedStories} />
       </header>
@@ -95,19 +101,38 @@ function App() {
   );
 } 
 
-const Search = ( { search, onSearch } ) => (
-  <div>
-    {console.log('search component ran')}
-    <label htmlFor="search">Search: </label>
-    <input
-      id="search"
-      type="text"
-      // call back
-      value={search}
-      onChange={onSearch}
-    />
-  </div>
-);
+// id label value onInputchange are now dynamic value
+// you can change them
+const InputWithLabel = ( { id, label, value, onInputChange } ) => (
+  <>
+    <label htmlFor={id}>{label}</label>&nbsp;
+    <input type="text" id={id} value={value} onChange={onInputChange}/>
+  </>
+) 
+// you can just you parathesis after or to return jsx or you can also use
+// normal way of returning jsx 
+// const InputWithLabel = ( { id, label, value, onInputChange } ) => {
+//   return(
+//     <>
+//       <label htmlFor={id}>{label}</label>&nbsp;
+//       <input type="text" id={id} value={value} onChange={onInputChange}/>
+//     </>
+//     )
+// } 
+
+// const Search = ( { search, onSearch } ) => (
+//   <div>
+//     {console.log('search component ran')}
+//     <label htmlFor="search">Search: </label>
+//     <input
+//       id="search"
+//       type="text"
+//       // call back
+//       value={search}
+//       onChange={onSearch}
+//     />
+//   </div>
+// );
 
 const List = ( {list} ) => { 
   // console.log(list);

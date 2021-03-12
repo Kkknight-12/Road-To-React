@@ -1,6 +1,32 @@
 import {useEffect, useState} from 'react';
 
+// while making custom hook you need to
+// use "use" keyword as prefix for hook name
+// you must return value that too in form of array
+//                         key='search', initialState='React'
+const useSemiPersistentState = (key, initialState) => { 
+  console.log(`useSemiPersistentState ran`)
+  // React, dispatchAction()
+    const [value, setValue] = useState(
+    // if no value is found in local storage
+    // which will happen on initial search,
+    // React word will be used to filter 
+    localStorage.getItem(key) || initialState );
+
+// useEffect is used to change the value of search term in local storage
+// whenever dependency term changes loacal storage term will change
+  useEffect( () => {
+    localStorage.setItem( key, value );
+  }, [value, key] ); // dependency
+
+  return [
+    value,
+    setValue
+  ]
+}
+
 function App() {
+  console.log('App function ran')
   const stories = [
     {
       title: 'React',
@@ -43,33 +69,23 @@ function App() {
       objectID: 4,
     },
   ];
+                                                                // key, value
+  const [ searchTerm, setSearchTerm ] = useSemiPersistentState('search', '');
+  console.log('After searchTerm')
 
-  const [searchTerm, setSearchTerm] = useState(
-    // if no value is found in local storage
-    // which will happen on initial search,
-    // React word will be used to filter 
-        localStorage.getItem('search') || 'React');
-
-// useEffect is used to change the value of search term in local storage
-// whenever dependency term changes loacal storage term will change
-  useEffect( () => {
-    localStorage.setItem( 'search', searchTerm );
-  }, [searchTerm] ); // dependency
-
-  const handleSearch = event => {
-    setSearchTerm( event.target.value );
-  };
+  const handleSearch = event => { setSearchTerm( event.target.value ) };
+  console.log('handleSearch')
 
   const searchedStories = stories.filter(story =>
     // benefit of using include method is if nothing is entered 
     // the whole data will be shown
     story.title.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-  
-  
-
-  return (
-    <div className="App">
+    );
+    console.log('searchedStories')
+    
+    return (
+      <div className="App">
+      {console.log('return inside App ran')}
       <header className="App-header">
         <Search search={searchTerm} onSearch={handleSearch} />
         <hr />
@@ -77,10 +93,11 @@ function App() {
       </header>
     </div>
   );
-}
+} 
 
 const Search = ( { search, onSearch } ) => (
   <div>
+    {console.log('search component ran')}
     <label htmlFor="search">Search: </label>
     <input
       id="search"

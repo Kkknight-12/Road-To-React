@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react';
+import {useEffect, useRef, useState} from 'react';
 
 // while making custom hook you need to
 // use "use" keyword as prefix for hook name
@@ -87,14 +87,20 @@ function App() {
       <div className="App">
       {console.log('return inside App ran')}
       <header className="App-header">
-        {/* <Search search={searchTerm} onSearch={handleSearch} /> */}
-        {/* Making Search reusable component */}
+        {/* We are inserting text: Search between component's element tags */}
+        {/* now you can access this information via react's children prop */}
+        {/* Everything that’s passed between a component’s elements can be accessed as children in the component and be rendered somewhere.*/}
         <InputWithLabel
-        id = 'search'
-        label = 'Search'
-        value = {searchTerm}
-        onInputChange = {handleSearch}
-        />
+          id = 'search'
+          value = {searchTerm}
+          /*  
+          - isFoc an attribute is equivalent to isFocused={true}.
+          - its just a varaible that we are passsing so we can name it anything
+          */
+          isFoc
+          onInputChange = {handleSearch}>
+         <strong>Search:</strong>
+        </InputWithLabel>
         <hr />
         <List list={searchedStories} />
       </header>
@@ -104,36 +110,30 @@ function App() {
 
 // id label value onInputchange are now dynamic value
 // you can change them
-const InputWithLabel = ( { id, label, value, onInputChange } ) => (
+// you can access infomation between component tag with keyword children
+
+const InputWithLabel = ( { id, value, type='text', isFoc, onInputChange, children } ) => {
+  const inputRef = useRef();
+
+  // useEffect( () => {
+  //   if( isFoc && inputRef.current ){
+  //     // The focus() method is used to give focus to an element
+  //     inputRef.current.focus();
+  //   }
+  // },[isFoc]);
+
+  return(
   <>
-    <label htmlFor={id}>{label}</label>&nbsp;
-    <input type="text" id={id} value={value} onChange={onInputChange}/>
+    <label htmlFor={id}>{children}</label>
+    {/* autofocus attribute is a boolean attribute.
+    When present, it specifies that an <input> element 
+    should automatically get focus when the page loads. */}
+    {/* as we are passing the isFoc to input so it will always be present
+    so that concludes that autoFocus will be true */}
+    <input ref={inputRef} type={type} id={id} value={value} autoFocus={isFoc} onChange={onInputChange}/>
   </>
 ) 
-// you can just you parathesis after or to return jsx or you can also use
-// normal way of returning jsx 
-// const InputWithLabel = ( { id, label, value, onInputChange } ) => {
-//   return(
-//     <>
-//       <label htmlFor={id}>{label}</label>&nbsp;
-//       <input type="text" id={id} value={value} onChange={onInputChange}/>
-//     </>
-//     )
-// } 
-
-// const Search = ( { search, onSearch } ) => (
-//   <div>
-//     {console.log('search component ran')}
-//     <label htmlFor="search">Search: </label>
-//     <input
-//       id="search"
-//       type="text"
-//       // call back
-//       value={search}
-//       onChange={onSearch}
-//     />
-//   </div>
-// );
+}
 
 const List = ( {list} ) => { 
   // console.log(list);

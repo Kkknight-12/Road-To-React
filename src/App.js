@@ -25,63 +25,75 @@ const useSemiPersistentState = (key, initialState) => {
   ]
 }
 
+// To gain control over the list, we are making it stateful 
+// by using it as initial state in React's useState hook
+const initialStories = [
+  {
+    title: 'React',
+    url: 'https://reactjs.org/',
+    author: 'Jordan Walke',
+    num_comments: 3,
+    points: 4,
+    objectID: 0,
+  },
+  {
+    title: 'Redux',
+    url: 'https://redux.js.org/',
+    author: 'Dan Abramov, Andrew Clark',
+    num_comments: 2,
+    points: 5,
+    objectID: 1,
+  },
+  {
+    title: 'Javascript',
+    url: 'https://www.learn-js.org/',
+    author: 'Js',
+    num_comments: 4,
+    points: 3,
+    objectID: 2,
+  },
+  {
+    title: 'Css',
+    url: 'https://www.w3.org/Style/CSS/Overview.en.html',
+    author: 'Js',
+    num_comments: 4,
+    points: 5,
+    objectID: 3,
+  },
+  {
+    title: 'Html',
+    url: 'https://www.learn-html.org/',
+    author: 'Html',
+    num_comments: 6,
+    points: 6,
+    objectID: 4,
+  },
+];
 function App() {
-  console.log('App function ran')
-  const stories = [
-    {
-      title: 'React',
-      url: 'https://reactjs.org/',
-      author: 'Jordan Walke',
-      num_comments: 3,
-      points: 4,
-      objectID: 0,
-    },
-    {
-      title: 'Redux',
-      url: 'https://redux.js.org/',
-      author: 'Dan Abramov, Andrew Clark',
-      num_comments: 2,
-      points: 5,
-      objectID: 1,
-    },
-    {
-      title: 'Javascript',
-      url: 'https://www.learn-js.org/',
-      author: 'Js',
-      num_comments: 4,
-      points: 3,
-      objectID: 2,
-    },
-    {
-      title: 'Css',
-      url: 'https://www.w3.org/Style/CSS/Overview.en.html',
-      author: 'Js',
-      num_comments: 4,
-      points: 5,
-      objectID: 3,
-    },
-    {
-      title: 'Html',
-      url: 'https://www.learn-html.org/',
-      author: 'Html',
-      num_comments: 6,
-      points: 6,
-      objectID: 4,
-    },
-  ];
+  
+  const [ stories, setStories ] = useState(initialStories);
+
+  // here form item detail, which came from List, 
+  // we perform filter and remove that item which matches
+  // the id in stories
+  const handleRemoveStory = ( item ) => {
+    console.log(item)
+    const newStories = stories.filter(
+      story => item.objectID !== story.objectID
+    )
+    // now we are resetting the stories with filtered items
+    setStories(newStories);
+  }
                                                                 // key, value
   const [ searchTerm, setSearchTerm ] = useSemiPersistentState( 'search', '');
-  console.log('After searchTerm')
 
   const handleSearch = event => { setSearchTerm( event.target.value ) };
-  console.log('handleSearch')
 
   const searchedStories = stories.filter(story =>
     // benefit of using include method is if nothing is entered 
     // the whole data will be shown
     story.title.toLowerCase().includes(searchTerm.toLowerCase())
     );
-    console.log('searchedStories')
     
     return (
       <div className="App">
@@ -98,11 +110,11 @@ function App() {
           - its just a varaible that we are passsing so we can name it anything
           */
           isFoc
-          onInputChange = {handleSearch}>
+          onInputChange={handleSearch}>
          <strong>Search:</strong>
         </InputWithLabel>
         <hr />
-        <List list={searchedStories} />
+        <List list={searchedStories} onRemoveItem={handleRemoveStory} />
       </header>
     </div>
   );
@@ -113,41 +125,65 @@ function App() {
 // you can access infomation between component tag with keyword children
 
 const InputWithLabel = ( { id, value, type='text', isFoc, onInputChange, children } ) => {
+  const inputRef = useRef();
+
+// React’s useEffect Hook, performing the focus 
+// on the input field when the component renders
+// (or its dependencies change).
+  useEffect( () => {
+    // we are passing isFoc to element
+    // so it will be present or we can say isFoc=true;
+    if( isFoc && inputRef.current ){
+      console.log(isFoc)
+      // <input type ='text' id='search' value>
+      // The focus() method is used to give focus to an element
+      // so we are setting focus on input that have id='search'
+      inputRef.current.focus();
+    }
+    // now we are executing focus programmatically as a side-effect,
+    // but only if isFoc is set and the current property is existent.
+  },[isFoc]);
 
   return(
   <>
     <label htmlFor={id}>{children}</label>
-    {/* autofocus attribute is a boolean attribute.
-    When present, it specifies that an <input> element 
-    should automatically get focus when the page loads. */}
     {/* as we are passing the isFoc to input so it will always be present
     so that concludes that autoFocus will be true */}
-    <input type={type} id={id} value={value} autoFocus={isFoc} onChange={onInputChange}/>
+    <input ref={inputRef} type={type} id={id} value={value} onChange={onInputChange}/>
   </>
 ) 
 }
 
-const List = ( {list} ) => { 
+const List = ( {list, onRemoveItem} ) => { 
   // console.log(list);
   // rest item after taking objectID
   // which will remove the objectID from remaning item.
-  return list.map( ({ objectID, ...item }) => < Item key={objectID} {...item} />)
-  //                             rest                                  spread
+  return list.map( (item) => < Item  key={item.objectID} item={item} onRemoveItem={onRemoveItem} />)
 }
 
 // now you can directly destructring item
 // destructring will be done first then other parameter will be written after comma
-const Item = ( { url, title, author, num_comments, points }, key ) => {
+const Item = ( {item, onRemoveItem} ) => {
+  const { url, title, author, num_comments, points } = item;
+
   return (
     <div>
       <span>
         <a href={url}>{title}</a>
       </span>
-      <ul key={key.objectID}>
+      <ul >
         <li>{author}</li>
         <li>{num_comments}</li>
         <li>{points}</li>
       </ul>
+      <button type='button'
+      // inline handlers allow us to execute the function right in the JSX.
+      // here we are sending back the item to function handleRemoveStory
+      // so each item will have a button which on click will send item detail back 
+      // to the function
+      onClick={ () => onRemoveItem(item) }>
+        Dismiss
+      </button>
     </div>
   );
 };

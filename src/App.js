@@ -113,14 +113,6 @@ function App() {
 // you can access infomation between component tag with keyword children
 
 const InputWithLabel = ( { id, value, type='text', isFoc, onInputChange, children } ) => {
-  const inputRef = useRef();
-
-  // useEffect( () => {
-  //   if( isFoc && inputRef.current ){
-  //     // The focus() method is used to give focus to an element
-  //     inputRef.current.focus();
-  //   }
-  // },[isFoc]);
 
   return(
   <>
@@ -130,7 +122,7 @@ const InputWithLabel = ( { id, value, type='text', isFoc, onInputChange, childre
     should automatically get focus when the page loads. */}
     {/* as we are passing the isFoc to input so it will always be present
     so that concludes that autoFocus will be true */}
-    <input ref={inputRef} type={type} id={id} value={value} autoFocus={isFoc} onChange={onInputChange}/>
+    <input type={type} id={id} value={value} autoFocus={isFoc} onChange={onInputChange}/>
   </>
 ) 
 }

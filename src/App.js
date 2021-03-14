@@ -1,11 +1,10 @@
-import {useEffect, useRef, useState} from 'react';
+import {useEffect, useReducer, useRef, useState} from 'react';
 
 // while making custom hook you need to
 // use "use" keyword as prefix for hook name
 // you must return value that too in form of array
 //                         key='search', initialState='React'
 const useSemiPersistentState = (key, initialState) => { 
-  console.log(`useSemiPersistentState ran`)
   // React, dispatchAction()
     const [value, setValue] = useState(
     // if no value is found in local storage
@@ -73,7 +72,11 @@ const initialStories = [
 const getAsyncStories = () => { 
   return new Promise( resolve => {
     setTimeout( () => resolve( 
-      {data:{ stories:initialStories } } ), 2000 
+      // data is an object
+      // which has stories object which finally have initialStories
+      // {data: {…}}
+      // data: stories: (5) [{…}, {…}, {…}, {…}, {…}]
+      { data:{ stories:initialStories } } ), 2000 
     )
   })
 };
@@ -86,47 +89,97 @@ const getAsyncStories = () => {
 //     )
 //   );
 
+const storiesReducer = (state, action) => {
+  console.log(action.payload)
+  // console.log(state)
+  // {data: Array(0), isLoading: false, isError: false}
+  switch (action.type) {
+    case 'STORIES_FETCH':
+      return{
+        ...state,
+        isLoading:true,
+        isError:false
+      };
+
+    case 'STORIES_FETCH_SUCCESS':
+      return{
+        ...state,
+        isLoading:false,
+        isError:false,
+        data: action.payload
+      };
+
+    case 'STORIES_FETCH_FAILURE':
+      return{
+        ...state,
+        isLoading:false,
+        isError:true,
+      };
+    
+    case 'REMOVE_STORY':
+      return{
+        ...state,
+        data: state.data.filter(
+          story => action.payload.objectID !== story.objectID
+        ),
+      };
+
+    default:
+      throw new Error();
+  }
+}
+
 function App() {
-  const [ stories, setStories ] = useState([]);
+                                                              // key, value
+  const [ searchTerm, setSearchTerm ] = useSemiPersistentState( 'search', '');
+  // handling state with reducer
+  //                initial-state, action from dispatch
 
-  // setting up loading
-  const [isLoading, setIsLoading ] = useState(false);
-
-  const [ isError, setIsError ] = useState(false);
-
+  // stories will hold the defaultState values
+  const defaultState = { 
+      data: [],
+      isLoading: false,
+      isError: false
+  }
+  // stories will call for default state which hold information
+  // dispatchStories will look for despatch action and 
+  // then trigger storiesReducer function
+  //      state and dispatch-function  
+  const [ stories, dispatchStories ] = useReducer( storiesReducer, defaultState );
+  // dispatch begin with object that have properties
+  console.log(stories);
+  
   useEffect( () => {
-    setIsLoading(true);
+    dispatchStories( { type: 'STORIES_FETCH'});
 
     getAsyncStories()
       .then( result => {
-        setStories(result.data.stories);
-        setIsLoading(false);
+        dispatchStories( { 
+          type: 'STORIES_FETCH_SUCCESS',
+          // you are passing data with payload property
+          payload: result.data.stories
+        });
     })
-    // catch block will catch the error send from server
-    .catch(() => setIsError(true))
-  }, []);
+    // catch block will catch the error sent from server
+    .catch( () => 
+      dispatchStories( {type: 'STORIES_FETCH_FAILURE'} )
+    )
+  }, [] );
 
   // here form item detail, which came from List, 
   // we perform filter and remove that item which matches
   // the id in stories
   const handleRemoveStory = ( item ) => {
-    console.log(item)
-    const newStories = stories.filter(
-      story => item.objectID !== story.objectID
-    )
-    // now we are resetting the stories with filtered items
-    setStories(newStories);
+    dispatchStories( {type:'REMOVE_STORY', payload: item } )
   }
-                                                                // key, value
-  const [ searchTerm, setSearchTerm ] = useSemiPersistentState( 'search', '');
 
   const handleSearch = event => { setSearchTerm( event.target.value ) };
 
-  const searchedStories = stories.filter(story =>
+  const searchedStories = stories.data.filter( story =>
     // benefit of using include method is if nothing is entered 
     // the whole data will be shown
-    story.title.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    story.title.toLowerCase().includes( searchTerm.toLowerCase() )
+  );
     
     return (
       <div className="App">
@@ -148,11 +201,12 @@ function App() {
         </InputWithLabel>
         {/* This time, it’s either rendering something or nothing. So instead of having a ternary operator where one side returns null, use the logical && operator as shorthand:
         so if there is error then only p tag will be shown */}
-        {isError && <p>Something Went Wrong.....</p> }
+        {/* now the all data is stored inside stories */}
+        { stories.isError && <p>Something Went Wrong.....</p> }
         <hr />
         {/* conditional rendering with ternary operator */}
         { 
-          isLoading ? (
+          stories.isLoading ? (
             <p>Loading...</p> )
           : (
             <List 
@@ -180,7 +234,7 @@ const InputWithLabel = ( { id, value, type='text', isFoc, onInputChange, childre
     // we are passing isFoc to element
     // so it will be present or we can say isFoc=true;
     if( isFoc && inputRef.current ){
-      console.log(isFoc)
+      // console.log(isFoc)
       // <input type ='text' id='search' value>
       // The focus() method is used to give focus to an element
       // so we are setting focus on input that have id='search'

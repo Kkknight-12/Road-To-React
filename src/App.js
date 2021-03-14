@@ -69,9 +69,42 @@ const initialStories = [
     objectID: 4,
   },
 ];
+
+const getAsyncStories = () => { 
+  return new Promise( resolve => {
+    setTimeout( () => resolve( 
+      {data:{ stories:initialStories } } ), 2000 
+    )
+  })
+};
+
+// Arrow function without bracket and return
+// const getAsyncStories = () => 
+//   new Promise( resolve => 
+//     setTimeout( () => resolve( 
+//       {data:{ stories:initialStories } } ), 2000 
+//     )
+//   );
+
 function App() {
-  
-  const [ stories, setStories ] = useState(initialStories);
+  const [ stories, setStories ] = useState([]);
+
+  // setting up loading
+  const [isLoading, setIsLoading ] = useState(false);
+
+  const [ isError, setIsError ] = useState(false);
+
+  useEffect( () => {
+    setIsLoading(true);
+
+    getAsyncStories()
+      .then( result => {
+        setStories(result.data.stories);
+        setIsLoading(false);
+    })
+    // catch block will catch the error send from server
+    .catch(() => setIsError(true))
+  }, []);
 
   // here form item detail, which came from List, 
   // we perform filter and remove that item which matches
@@ -113,8 +146,21 @@ function App() {
           onInputChange={handleSearch}>
          <strong>Search:</strong>
         </InputWithLabel>
+        {/* This time, it’s either rendering something or nothing. So instead of having a ternary operator where one side returns null, use the logical && operator as shorthand:
+        so if there is error then only p tag will be shown */}
+        {isError && <p>Something Went Wrong.....</p> }
         <hr />
-        <List list={searchedStories} onRemoveItem={handleRemoveStory} />
+        {/* conditional rendering with ternary operator */}
+        { 
+          isLoading ? (
+            <p>Loading...</p> )
+          : (
+            <List 
+            list={searchedStories} 
+            onRemoveItem={handleRemoveStory} 
+            />
+          )
+        }
       </header>
     </div>
   );

@@ -147,8 +147,9 @@ function App() {
   //      state and dispatch-function  
   const [ stories, dispatchStories ] = useReducer( storiesReducer, defaultState );
   // dispatch begin with object that have properties
-  console.log(stories);
-  
+  // console.log(stories);
+  // {data: Array(0), isLoading: false, isError: false}
+
   useEffect( () => {
     dispatchStories( { type: 'STORIES_FETCH'});
 
@@ -262,7 +263,6 @@ const List = ( {list, onRemoveItem} ) => {
 }
 
 // now you can directly destructring item
-// destructring will be done first then other parameter will be written after comma
 const Item = ( {item, onRemoveItem} ) => {
   const { url, title, author, num_comments, points } = item;
 
